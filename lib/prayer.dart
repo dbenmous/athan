@@ -8,11 +8,31 @@ class PrayerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dummy data (replace with dynamic data later)
     String timeRemaining = '1h 23m';  // Time remaining for the next prayer (to be updated dynamically)
-    String nextPrayerTime = '06:30 PM';  // Next prayer time
+    String nextPrayerTime = '18:30';  // Next prayer time in 24-hour format
     String nextPrayerName = 'Isha';      // Next prayer name
     String hijriDate = '1 Muharram 1446';
     String gregorianDate = 'September 19, 2024';
     String location = 'Your City';       // City location
+
+    Map<String, String> prayers = {
+      'Fajr': '05:00',
+      'Dhuhr': '13:00',
+      'Asr': '16:30',
+      'Maghrib': '19:15',
+      'Isha': '20:30',
+      'Tahajjud': '02:00',
+    };
+
+    Map<String, bool> soundStatus = {
+      'Fajr': true,
+      'Dhuhr': false,
+      'Asr': true,
+      'Maghrib': false,
+      'Isha': true,
+      'Tahajjud': false,
+    };
+
+    String nextPrayer = 'Asr';  // Next prayer to be highlighted
 
     return Scaffold(
       body: Stack(
@@ -87,6 +107,7 @@ class PrayerPage extends StatelessWidget {
                         style: const TextStyle(
                           fontFamily: 'Mulish',
                           fontSize: 38,
+                          fontWeight: FontWeight.bold, // Set font weight to bold
                           color: Color(0xFFFFFFFF), // Light grey (#D3D3D3)
                         ),
                       ),
@@ -127,9 +148,9 @@ class PrayerPage extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 20),  // Padding below city name
 
-                  // Location Section with location icon and city name aligned to the left
+                  // City name and location icon
                   Row(
                     children: [
                       const Icon(
@@ -149,8 +170,93 @@ class PrayerPage extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 20),  // Padding below city name
+
+                  // Prayers Widgets (3 per row) with even horizontal alignment
+                  Expanded(
+                    child: Column(
+                      children: [
+                        // First row of 3 widgets
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,  // Equal space between widgets
+                          children: [
+                            buildPrayerWidget('Fajr', prayers['Fajr']!, soundStatus['Fajr']!, nextPrayer == 'Fajr'),
+                            buildPrayerWidget('Dhuhr', prayers['Dhuhr']!, soundStatus['Dhuhr']!, nextPrayer == 'Dhuhr'),
+                            buildPrayerWidget('Asr', prayers['Asr']!, soundStatus['Asr']!, nextPrayer == 'Asr'),
+                          ],
+                        ),
+                        const SizedBox(height: 16),  // Space between rows
+                        // Second row of 3 widgets
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,  // Equal space between widgets
+                          children: [
+                            buildPrayerWidget('Maghrib', prayers['Maghrib']!, soundStatus['Maghrib']!, nextPrayer == 'Maghrib'),
+                            buildPrayerWidget('Isha', prayers['Isha']!, soundStatus['Isha']!, nextPrayer == 'Isha'),
+                            buildPrayerWidget('Tahajjud', prayers['Tahajjud']!, soundStatus['Tahajjud']!, nextPrayer == 'Tahajjud'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build each prayer widget
+  Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, bool isNextPrayer) {
+    return Container(
+      width: 110,  // Set a fixed width
+      height: 130, // Set a fixed height for all widgets
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: isNextPrayer ? Colors.white : const Color(0xFFD3D3D3),  // White for next prayer, light grey for others
+        borderRadius: BorderRadius.circular(12.0),  // Rounded corners
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),  // Shadow position
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Bell icon (filled or outlined)
+          Align(
+            alignment: Alignment.topRight,
+            child: Icon(
+              isSoundOn ? Icons.notifications : Icons.notifications_off,  // Bell icon
+              color: isNextPrayer ? Colors.black : Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Prayer name
+          Text(
+            prayerName,
+            style: TextStyle(
+              fontFamily: 'Lato',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isNextPrayer ? Colors.black : Colors.white,  // Black for next prayer, white for others
+            ),
+          ),
+          const SizedBox(height: 5),
+          // Prayer time in 24-hour format
+          Text(
+            prayerTime,
+            style: TextStyle(
+              fontFamily: 'Lato',
+              fontSize: 15,
+              color: isNextPrayer ? Colors.black : const Color(0xFF808080),  // Grey for others, black for next prayer
             ),
           ),
         ],
