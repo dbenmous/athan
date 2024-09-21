@@ -16,20 +16,20 @@ class PrayerPage extends StatelessWidget {
 
     Map<String, String> prayers = {
       'Fajr': '05:00',
+      'Sunrise': '06:00',
       'Dhuhr': '13:00',
       'Asr': '16:30',
       'Maghrib': '19:15',
       'Isha': '20:30',
-      'Tahajjud': '02:00',
     };
 
     Map<String, bool> soundStatus = {
       'Fajr': true,
+      'Sunrise': false,
       'Dhuhr': false,
       'Asr': true,
       'Maghrib': false,
       'Isha': true,
-      'Tahajjud': false,
     };
 
     String nextPrayer = 'Asr';  // Next prayer to be highlighted
@@ -82,7 +82,7 @@ class PrayerPage extends StatelessWidget {
                         'Next Prayer in ',
                         style: TextStyle(
                           fontFamily: 'Lato',
-                          fontSize: 24,
+                          fontSize: 20,
                           color: Color(0xFFE5ECED), // Grey color (#808080)
                         ),
                       ),
@@ -90,7 +90,7 @@ class PrayerPage extends StatelessWidget {
                         timeRemaining,
                         style: const TextStyle(
                           fontFamily: 'Lato',
-                          fontSize: 24,
+                          fontSize: 20,
                           color: Color(0xFFFFFFFF), // Same grey color for consistency
                         ),
                       ),
@@ -106,7 +106,7 @@ class PrayerPage extends StatelessWidget {
                         nextPrayerName,
                         style: const TextStyle(
                           fontFamily: 'Mulish',
-                          fontSize: 38,
+                          fontSize: 48,
                           fontWeight: FontWeight.bold, // Set font weight to bold
                           color: Color(0xFFFFFFFF), // Light grey (#D3D3D3)
                         ),
@@ -116,7 +116,8 @@ class PrayerPage extends StatelessWidget {
                         nextPrayerTime,
                         style: const TextStyle(
                           fontFamily: 'Mulish',
-                          fontSize: 38,
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold, // Set font weight to bold
                           color: Color(0xFFE6E6E6), // Lighter grey (#E6E6E6)
                         ),
                       ),
@@ -129,6 +130,7 @@ class PrayerPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+
                       Text(
                         hijriDate,
                         style: const TextStyle(
@@ -154,7 +156,7 @@ class PrayerPage extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(
-                        FontAwesomeIcons.locationArrow,  // Location icon
+                        FontAwesomeIcons.locationDot,  // Location icon
                         size: 25,
                         color: Color(0xFFB0C4DE),
                       ),
@@ -182,8 +184,8 @@ class PrayerPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,  // Equal space between widgets
                           children: [
                             buildPrayerWidget('Fajr', prayers['Fajr']!, soundStatus['Fajr']!, nextPrayer == 'Fajr'),
+                            buildPrayerWidget('Sunrise', prayers['Sunrise']!, soundStatus['Sunrise']!, nextPrayer == 'Sunrise'),
                             buildPrayerWidget('Dhuhr', prayers['Dhuhr']!, soundStatus['Dhuhr']!, nextPrayer == 'Dhuhr'),
-                            buildPrayerWidget('Asr', prayers['Asr']!, soundStatus['Asr']!, nextPrayer == 'Asr'),
                           ],
                         ),
                         const SizedBox(height: 16),  // Space between rows
@@ -191,9 +193,9 @@ class PrayerPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,  // Equal space between widgets
                           children: [
+                            buildPrayerWidget('Asr', prayers['Asr']!, soundStatus['Asr']!, nextPrayer == 'Asr'),
                             buildPrayerWidget('Maghrib', prayers['Maghrib']!, soundStatus['Maghrib']!, nextPrayer == 'Maghrib'),
                             buildPrayerWidget('Isha', prayers['Isha']!, soundStatus['Isha']!, nextPrayer == 'Isha'),
-                            buildPrayerWidget('Tahajjud', prayers['Tahajjud']!, soundStatus['Tahajjud']!, nextPrayer == 'Tahajjud'),
                           ],
                         ),
                       ],
