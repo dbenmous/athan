@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // For location icon
+import 'duae.dart'; // Import the duaes list
 
-class PrayerPage extends StatelessWidget {
+class PrayerPage extends StatefulWidget {
   const PrayerPage({super.key});
+
+  @override
+  State<PrayerPage> createState() => _PrayerPageState();
+}
+
+class _PrayerPageState extends State<PrayerPage> {
+  int currentPage = 0; // Track the current page of duaes
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +21,6 @@ class PrayerPage extends StatelessWidget {
     String hijriDate = '1 Muharram 1446';
     String gregorianDate = 'September 19, 2024';
     String location = 'Your City';       // City location
-    String todaysDua = 'اللهم اجعلني من التوابين واجعلني من المتطهرين  '; // Long Dua example
 
     Map<String, String> prayers = {
       'Fajr': '05:00',
@@ -49,135 +56,135 @@ class PrayerPage extends StatelessWidget {
           ),
           // SafeArea to prevent overlap with system UI
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Settings icon as three horizontal dots inside a white circle
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white, // White circle background
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.more_horiz, // Three horizontal dots icon
-                          color: Colors.black, // Black dots
+            child: SingleChildScrollView( // Make the whole page scrollable
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Settings icon as three horizontal dots inside a white circle
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFE5ECED), // White circle background
                         ),
-                        onPressed: () {
-                          // Add your settings page navigation here
-                        },
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.more_horiz, // Three horizontal dots icon
+                            color: Colors.black, // Black dots
+                          ),
+                          onPressed: () {
+                            // Add your settings page navigation here
+                          },
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Next Prayer Section: "Next prayer in" followed by the time remaining (same line)
-                  Row(
-                    children: [
-                      const Text(
-                        'Next Prayer in ',
-                        style: TextStyle(
-                          fontFamily: 'Lato',
-                          fontSize: 20,
-                          color: Color(0xFFE5ECED), // Grey color (#808080)
+                    // Next Prayer Section: "Next prayer in" followed by the time remaining (same line)
+                    Row(
+                      children: [
+                        const Text(
+                          'Next Prayer in ',
+                          style: TextStyle(
+                            fontFamily: 'Lato',
+                            fontSize: 20,
+                            color: Color(0xFFE5ECED), // Grey color (#808080)
+                          ),
                         ),
-                      ),
-                      Text(
-                        timeRemaining,
-                        style: const TextStyle(
-                          fontFamily: 'Lato',
-                          fontSize: 20,
-                          color: Color(0xFFFFFFFF), // Same grey color for consistency
+                        Text(
+                          timeRemaining,
+                          style: const TextStyle(
+                            fontFamily: 'Lato',
+                            fontSize: 20,
+                            color: Color(0xFFFFFFFF), // Same grey color for consistency
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  // Next prayer name (Isha) and time on the same line (new line)
-                  Row(
-                    children: [
-                      Text(
-                        nextPrayerName,
-                        style: const TextStyle(
-                          fontFamily: 'Mulish',
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold, // Set font weight to bold
-                          color: Color(0xFFFFFFFF), // Light grey (#D3D3D3)
+                    // Next prayer name (Isha) and time on the same line (new line)
+                    Row(
+                      children: [
+                        Text(
+                          nextPrayerName,
+                          style: const TextStyle(
+                            fontFamily: 'Mulish',
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold, // Set font weight to bold
+                            color: Color(0xFFFFFFFF), // Light grey (#D3D3D3)
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        nextPrayerTime,
-                        style: const TextStyle(
-                          fontFamily: 'Mulish',
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold, // Set font weight to bold
-                          color: Color(0xFFE6E6E6), // Lighter grey (#E6E6E6)
+                        const SizedBox(width: 10),
+                        Text(
+                          nextPrayerTime,
+                          style: const TextStyle(
+                            fontFamily: 'Mulish',
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold, // Set font weight to bold
+                            color: Color(0xFFE6E6E6), // Lighter grey (#E6E6E6)
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Date Section (Hijri and Gregorian dates)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        hijriDate,
-                        style: const TextStyle(
-                          fontFamily: 'Lato',
-                          fontSize: 16,
-                          color: Color(0xFFB0C4DE), // LightSteelBlue (#B0C4DE)
+                    // Date Section (Hijri and Gregorian dates)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          hijriDate,
+                          style: const TextStyle(
+                            fontFamily: 'Lato',
+                            fontSize: 16,
+                            color: Color(0xFFB0C4DE), // LightSteelBlue (#B0C4DE)
+                          ),
                         ),
-                      ),
-                      Text(
-                        gregorianDate,
-                        style: const TextStyle(
-                          fontFamily: 'Lato',
-                          fontSize: 16,
-                          color: Color(0xFFB0C4DE), // LightSteelBlue (#B0C4DE)
+                        Text(
+                          gregorianDate,
+                          style: const TextStyle(
+                            fontFamily: 'Lato',
+                            fontSize: 16,
+                            color: Color(0xFFB0C4DE), // LightSteelBlue (#B0C4DE)
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 20),  // Padding below city name
+                    const SizedBox(height: 20),  // Padding below city name
 
-                  // City name and location icon
-                  Row(
-                    children: [
-                      const Icon(
-                        FontAwesomeIcons.locationDot,  // Location icon
-                        size: 25,
-                        color: Color(0xFFB0C4DE),
-                      ),
-                      const SizedBox(width: 10),  // Space between icon and text
-                      Text(
-                        location,
-                        style: const TextStyle(
-                          fontFamily: 'Lato',
-                          fontSize: 35,
-                          color: Color(0xFFFFFFFF), // White/Grey (#F8F8FF)
-                          fontWeight: FontWeight.normal,
+                    // City name and location icon
+                    Row(
+                      children: [
+                        const Icon(
+                          FontAwesomeIcons.locationDot,  // Location icon
+                          size: 25,
+                          color: Color(0xFFB0C4DE),
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 10),  // Space between icon and text
+                        Text(
+                          location,
+                          style: const TextStyle(
+                            fontFamily: 'Lato',
+                            fontSize: 35,
+                            color: Color(0xFFFFFFFF), // White/Grey (#F8F8FF)
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 20),  // Padding below city name
+                    const SizedBox(height: 20),  // Padding below city name
 
-                  // Prayers Widgets (3 per row) with even horizontal alignment
-                  Expanded(
-                    child: Column(
+                    // Prayers Widgets (3 per row) with even horizontal alignment
+                    Column(
                       children: [
                         // First row of 3 widgets
                         Row(
@@ -200,16 +207,12 @@ class PrayerPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),  // Space above Today's Duae
 
-                        // Scrollable Today's Duae section (Single widget with title and duae)
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: buildDuaeSection("Today's Duae", todaysDua),
-                          ),
-                        ),
+                        // Swipeable Duae Section
+                        buildSwipeableDuaeSection(),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -274,6 +277,45 @@ class PrayerPage extends StatelessWidget {
     );
   }
 
+  // Widget for the swipeable "Today's Duae" section
+  Widget buildSwipeableDuaeSection() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 150,  // Set height for duae container
+          child: PageView.builder(
+            onPageChanged: (index) {
+              setState(() {
+                currentPage = index;
+              });
+            },
+            itemCount: duaes.length,  // Number of duaes
+            itemBuilder: (context, index) {
+              return buildDuaeSection("Today's Duae", duaes[index]);
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Dot indicators to show current duae
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(duaes.length, (index) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              height: 10,
+              width: currentPage == index ? 10 : 7,
+              decoration: BoxDecoration(
+                color: currentPage == index ? Colors.blue : Colors.grey,
+                shape: BoxShape.circle,
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
   // Widget for the "Today's Duae" section (Single widget with title and duae)
   Widget buildDuaeSection(String title, String duae) {
     return Container(
@@ -297,16 +339,16 @@ class PrayerPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          // Duae
+          // Duae (Arabic, right-aligned)
           Text(
             duae,
             style: const TextStyle(
-              fontFamily: 'Mulish',
-              fontSize: 20,
+              fontFamily: 'Jamil-nory',
+              fontSize: 25,
               fontWeight: FontWeight.normal,
               color: Color(0xFFE5ECED),  // White color for the duae
             ),
-            textAlign: TextAlign.start,
+            textAlign: TextAlign.right,  // Align text to the right for Arabic
           ),
         ],
       ),

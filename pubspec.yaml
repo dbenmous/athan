@@ -40,3 +40,7 @@ flutter:
       fonts:
         - asset: assets/fonts/Mulish.ttf
           weight: 700
+    - family: Jamil-nory
+      fonts:
+        - asset: assets/fonts/Jamil-nory.ttf
+          weight: 700
