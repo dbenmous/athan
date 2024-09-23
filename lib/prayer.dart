@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // For location icon
 import 'duae.dart'; // Import the duaes list
+import 'hadiths.dart'; // Import the hadiths list
+import 'story.dart'; // Import the story page
+import 'package:intl/intl.dart'; // For date formatting
 
 class PrayerPage extends StatefulWidget {
   const PrayerPage({super.key});
@@ -11,6 +14,7 @@ class PrayerPage extends StatefulWidget {
 
 class _PrayerPageState extends State<PrayerPage> {
   int currentPage = 0; // Track the current page of duaes
+  List<bool> viewedStories = List.generate(7, (index) => false); // Track viewed state of 7 stories
 
   @override
   void initState() {
@@ -25,10 +29,10 @@ class _PrayerPageState extends State<PrayerPage> {
     // Dummy data (replace with dynamic data later)
     String timeRemaining = '1h 23m';  // Time remaining for the next prayer (to be updated dynamically)
     String nextPrayerTime = '18:30';  // Next prayer time in 24-hour format
-    String nextPrayerName = 'Isha';      // Next prayer name
+    String nextPrayerName = 'Isha';   // Next prayer name
     String hijriDate = '1 Muharram 1446';
     String gregorianDate = 'September 19, 2024';
-    String location = 'Your City';       // City location
+    String location = 'Your City';    // City location
 
     Map<String, String> prayers = {
       'Fajr': '05:00',
@@ -166,7 +170,12 @@ class _PrayerPageState extends State<PrayerPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),  // Padding below city name
+                    const SizedBox(height: 20),  // Padding before stories
+
+                    // Stories Section
+                    buildStoriesSection(),
+
+                    const SizedBox(height: 20),  // Padding before city name
 
                     // City name and location icon
                     Row(
@@ -285,8 +294,71 @@ class _PrayerPageState extends State<PrayerPage> {
     );
   }
 
-  // Widget for the swipeable "Today's Duae" section
-// Widget for the swipeable "Today's Duae" section
+  // Stories Section
+  Widget buildStoriesSection() {
+    DateTime today = DateTime.now();
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 7, // Show the last 7 stories
+        itemBuilder: (context, index) {
+          DateTime storyDate = today.subtract(Duration(days: index));
+          String formattedDate = DateFormat('MMMM d').format(storyDate); // Format the date
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0), // Add padding between stories
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  viewedStories[index] = true; // Mark the story as viewed
+                });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StoryDetailPage(
+                      imagePath: 'assets/images/story_${index + 1}.png', // Add your image paths here
+                      hadith: hadiths[index % hadiths.length], // Rotate through hadiths
+                      onClose: () {
+                        setState(() {
+                          viewedStories[index] = true; // Mark as viewed on close
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: Column(
+                children: [
+                  // Circular story image
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/story_${index + 1}.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      color: viewedStories[index] ? Colors.grey : null, // Dim if viewed
+                      colorBlendMode: viewedStories[index] ? BlendMode.saturation : null,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    formattedDate, // Display the date
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Swipeable Duae Section
   Widget buildSwipeableDuaeSection() {
     return Column(
       children: [
@@ -344,7 +416,6 @@ class _PrayerPageState extends State<PrayerPage> {
   // Widget for the "Today's Duae" section (Single widget with duae content)
   Widget buildDuaeSection(String duae) {
     return Container(
-      //height: 200, // Set your desired fixed height here
       padding: const EdgeInsets.all(12.0), // Add some padding to make it look better
       decoration: BoxDecoration(
         color: const Color(0xFDFDFD), // Transparent grey background
@@ -366,7 +437,7 @@ class _PrayerPageState extends State<PrayerPage> {
           const SizedBox(height: 10), // Space between title and duae text
 
           // Duae content
-          Expanded(  // Use Expanded only if this is inside a Column/Row
+          Expanded(
             child: SingleChildScrollView(
               child: Text(
                 duae,
@@ -385,6 +456,4 @@ class _PrayerPageState extends State<PrayerPage> {
       ),
     );
   }
-
-
 }
