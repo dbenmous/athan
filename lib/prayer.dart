@@ -13,6 +13,14 @@ class _PrayerPageState extends State<PrayerPage> {
   int currentPage = 0; // Track the current page of duaes
 
   @override
+  void initState() {
+    super.initState();
+    // Calculate today's duae index based on the current date
+    DateTime now = DateTime.now();
+    currentPage = now.day % duaes.length; // Ensure the duae index wraps around
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Dummy data (replace with dynamic data later)
     String timeRemaining = '1h 23m';  // Time remaining for the next prayer (to be updated dynamically)
@@ -278,80 +286,105 @@ class _PrayerPageState extends State<PrayerPage> {
   }
 
   // Widget for the swipeable "Today's Duae" section
+// Widget for the swipeable "Today's Duae" section
   Widget buildSwipeableDuaeSection() {
     return Column(
       children: [
-        SizedBox(
-          height: 150,  // Set height for duae container
-          child: PageView.builder(
-            onPageChanged: (index) {
-              setState(() {
-                currentPage = index;
-              });
-            },
-            itemCount: duaes.length,  // Number of duaes
-            itemBuilder: (context, index) {
-              return buildDuaeSection("Today's Duae", duaes[index]);
-            },
+        Container(
+          width: 360,  // Set a fixed width to match the prayer widget rows (adjust if needed)
+          decoration: BoxDecoration(
+            color: const Color(0xB6A0B3DD),  // Transparent grey background
+            borderRadius: BorderRadius.circular(15.0),  // Rounded corners
           ),
-        ),
-        const SizedBox(height: 10),
-        // Dot indicators to show current duae
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(duaes.length, (index) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 5),
-              height: 10,
-              width: currentPage == index ? 10 : 7,
-              decoration: BoxDecoration(
-                color: currentPage == index ? Colors.blue : Colors.grey,
-                shape: BoxShape.circle,
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center, // Center the content horizontally
+            children: [
+              SizedBox(
+                height: 170, // Automatically adjusts the height based on content
+                child: PageView.builder(
+                  controller: PageController(initialPage: currentPage), // Start with the duae of the day
+                  onPageChanged: (index) {
+                    setState(() {
+                      currentPage = index;
+                    });
+                  },
+                  itemCount: duaes.length,  // Number of duaes
+                  itemBuilder: (context, index) {
+                    return Center(
+                      child: buildDuaeSection(duaes[index]),
+                    );
+                  },
+                ),
               ),
-            );
-          }),
+              const SizedBox(height: 10),
+              // Dot indicators to show current duae
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    height: 10,
+                    width: currentPage % 3 == index ? 10 : 7, // Show only 3 dots for page navigation
+                    decoration: BoxDecoration(
+                      color: currentPage % 3 == index ? Colors.blueGrey : Colors.grey,  // White-grey color
+                      shape: BoxShape.circle,
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  // Widget for the "Today's Duae" section (Single widget with title and duae)
-  Widget buildDuaeSection(String title, String duae) {
+  // Widget for the "Today's Duae" section (Single widget with duae content)
+  Widget buildDuaeSection(String duae) {
     return Container(
-      width: 355,  // Width of the entire box
-      padding: const EdgeInsets.all(12.0),
+      //height: 200, // Set your desired fixed height here
+      padding: const EdgeInsets.all(12.0), // Add some padding to make it look better
       decoration: BoxDecoration(
-        color: const Color(0xB6A0B3DD),  // Transparent grey background
-        borderRadius: BorderRadius.circular(15.0),  // Rounded corners
+        color: const Color(0xFDFDFD), // Transparent grey background
+        borderRadius: BorderRadius.circular(15.0), // Rounded corners
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Align title to the start
         children: [
-          // Title
-          Text(
-            title,
-            style: const TextStyle(
+          // Title: "Today's Duae"
+          const Text(
+            "Today's Duae",
+            style: TextStyle(
               fontFamily: 'Mulish',
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFFE5ECED),  // Grey color for the title
             ),
           ),
-          const SizedBox(height: 10),
-          // Duae (Arabic, right-aligned)
-          Text(
-            duae,
-            style: const TextStyle(
-              fontFamily: 'Jamil-nory',
-              fontSize: 25,
-              fontWeight: FontWeight.normal,
-              color: Color(0xFFE5ECED),  // White color for the duae
+          const SizedBox(height: 10), // Space between title and duae text
+
+          // Duae content
+          Expanded(  // Use Expanded only if this is inside a Column/Row
+            child: SingleChildScrollView(
+              child: Text(
+                duae,
+                style: const TextStyle(
+                  fontFamily: 'Jamil-nory',
+                  fontSize: 25,
+                  fontWeight: FontWeight.normal,
+                  color: Color(0xFFE5ECED),  // White color for the duae
+                ),
+                textAlign: TextAlign.center,  // Center the duae text
+                textDirection: TextDirection.rtl,  // Ensure proper right alignment for Arabic
+              ),
             ),
-            textAlign: TextAlign.right,  // Align text to the right for Arabic
           ),
         ],
       ),
     );
   }
+
+
 }
