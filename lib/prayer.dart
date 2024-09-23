@@ -307,7 +307,7 @@ class _PrayerPageState extends State<PrayerPage> {
           String formattedDate = DateFormat('MMMM d').format(storyDate); // Format the date
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0), // Add padding between stories
+            padding: const EdgeInsets.symmetric(horizontal: 5.0), // Add padding between stories
             child: GestureDetector(
               onTap: () {
                 setState(() {
@@ -437,7 +437,8 @@ class _PrayerPageState extends State<PrayerPage> {
           const SizedBox(height: 10), // Space between title and duae text
 
           // Duae content
-          Expanded(
+          // Duae content
+          Expanded(  // Use Expanded only if this is inside a Column/Row
             child: SingleChildScrollView(
               child: Text(
                 duae,
@@ -448,7 +449,7 @@ class _PrayerPageState extends State<PrayerPage> {
                   color: Color(0xFFE5ECED),  // White color for the duae
                 ),
                 textAlign: TextAlign.center,  // Center the duae text
-                textDirection: TextDirection.rtl,  // Ensure proper right alignment for Arabic
+                //textDirection: TextDirection.rtl,  // Ensure proper right alignment for Arabic
               ),
             ),
           ),
