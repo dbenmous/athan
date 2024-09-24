@@ -295,6 +295,8 @@ class _PrayerPageState extends State<PrayerPage> {
   }
 
   // Stories Section
+// Stories Section
+// Stories Section
   Widget buildStoriesSection() {
     DateTime today = DateTime.now();
     return SizedBox(
@@ -318,7 +320,10 @@ class _PrayerPageState extends State<PrayerPage> {
                   MaterialPageRoute(
                     builder: (context) => StoryDetailPage(
                       imagePath: 'assets/images/story_${index + 1}.png', // Add your image paths here
-                      hadith: hadiths[index % hadiths.length], // Rotate through hadiths
+                      hadithArabic: hadiths[index % hadiths.length].hadithArabic, // Use dot notation for Hadith class
+                      hadithEnglish: hadiths[index % hadiths.length].hadithEnglish, // Use dot notation
+                      arabicAudio: hadiths[index % hadiths.length].arabicAudio, // Audio path
+                      englishAudio: hadiths[index % hadiths.length].englishAudio, // Audio path
                       onClose: () {
                         setState(() {
                           viewedStories[index] = true; // Mark as viewed on close
