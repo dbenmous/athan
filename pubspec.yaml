@@ -16,6 +16,7 @@ dependencies:
   font_awesome_flutter: ^10.1.0
   google_fonts: ^2.0.0
   intl: ^0.17.0
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -28,7 +29,8 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
-
+    - assets/voices/arabic/
+    - assets/voices/english/
   fonts:
     - family: Lato
       fonts:
@@ -43,4 +45,8 @@ flutter:
     - family: Jamil-nory
       fonts:
         - asset: assets/fonts/Jamil-nory.ttf
+          weight: 700
+    - family: amiri
+      fonts:
+        - asset: assets/fonts/amiri.ttf
           weight: 700
