@@ -47,8 +47,10 @@ class _StoryDetailPageState extends State<StoryDetailPage>
   }
 
   Future<void> _playAudio(String audioPath) async {
-    await _audioPlayer.play(audioPath, isLocal: true);  // Play audio
+    // Use AssetSource for local assets and UrlSource for URLs
+    await _audioPlayer.play(AssetSource(audioPath));  // For local audio files in assets
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,19 +62,12 @@ class _StoryDetailPageState extends State<StoryDetailPage>
         automaticallyImplyLeading: false, // Remove default back button
         actions: [
           IconButton(
-            icon: const Text(
-              'X',
-              style: TextStyle(
-                fontWeight: FontWeight.bold, // Make the X button bold
-                color: Colors.white, // White color for the X
-                fontSize: 22, // Slightly bigger font size for better visibility
-              ),
-            ),
+            icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
             onPressed: () {
-              widget.onClose();
-              Navigator.pop(context); // Close story and return to main page
+              _playAudio('assets/audio/arabic_audio_1.mp3');  // Play Arabic audio
             },
           ),
+
         ],
       ),
       body: ClipRRect(
@@ -83,93 +78,105 @@ class _StoryDetailPageState extends State<StoryDetailPage>
         child: Container(
           color: Colors.white, // Set a background color for the content
           height: MediaQuery.of(context).size.height,  // Ensure the page covers the full screen height
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20), // Add some space from the top
-                AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    // Floating image with tilt effect
-                    return Transform(
-                      transform: Matrix4.identity()
-                        ..translate(
-                          1.5 * sin(_animationController.value * 2 * pi),
-                          1 * cos(_animationController.value * 2 * pi),
-                        )
-                        ..scale(1 + 0.005 * sin(_animationController.value * 2 * pi))
-                        ..rotateZ(0.005 * sin(_animationController.value * 2 * pi)),
-                      child: child,
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20), // Padding on right and left
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20), // Rounded corners for the image
-                      child: Image.asset(
-                        widget.imagePath,
-                        width: double.infinity, // Take full available width
-                        height: 200, // Adjust height as needed
-                        fit: BoxFit.cover, // Ensure the image is cropped correctly
-                      ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight, // Minimum height should be the screen height
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 20), // Add some space from the top
+                        AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            // Floating image with tilt effect
+                            return Transform(
+                              transform: Matrix4.identity()
+                                ..translate(
+                                  1.5 * sin(_animationController.value * 2 * pi),
+                                  1 * cos(_animationController.value * 2 * pi),
+                                )
+                                ..scale(1 + 0.005 * sin(_animationController.value * 2 * pi))
+                                ..rotateZ(0.005 * sin(_animationController.value * 2 * pi)),
+                              child: child,
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20), // Padding on right and left
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20), // Rounded corners for the image
+                              child: Image.asset(
+                                widget.imagePath,
+                                width: double.infinity, // Take full available width
+                                height: 200, // Adjust height as needed
+                                fit: BoxFit.cover, // Ensure the image is cropped correctly
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Display the hadith in Arabic with audio
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.hadithArabic,
+                                style: const TextStyle(
+                                  fontFamily: 'Amiri',  // Arabic font
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
+                                textAlign: TextAlign.right,  // Right-aligned for Arabic
+                                textDirection: TextDirection.rtl,  // RTL for Arabic
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
+                                onPressed: () {
+                                  _playAudio(widget.arabicAudio);  // Play Arabic audio
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Display the hadith in English with audio
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.hadithEnglish,
+                                style: const TextStyle(
+                                  fontFamily: 'Mulish',  // English font
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                                textAlign: TextAlign.left,  // Left-aligned for English
+                                textDirection: TextDirection.ltr,  // LTR for English
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
+                                onPressed: () {
+                                  _playAudio(widget.englishAudio);  // Play English audio
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(), // Ensures the page extends to the bottom if content is short
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Display the hadith in Arabic with audio
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.hadithArabic,
-                        style: const TextStyle(
-                          fontFamily: 'Amiri',  // Arabic font
-                          fontSize: 15,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.right,  // Right-aligned for Arabic
-                        textDirection: TextDirection.rtl,  // RTL for Arabic
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
-                        onPressed: () {
-                          _playAudio(widget.arabicAudio);  // Play Arabic audio
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Display the hadith in English with audio
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.hadithEnglish,
-                        style: const TextStyle(
-                          fontFamily: 'Mulish',  // English font
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.left,  // Left-aligned for English
-                        textDirection: TextDirection.ltr,  // LTR for English
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
-                        onPressed: () {
-                          _playAudio(widget.englishAudio);  // Play English audio
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
