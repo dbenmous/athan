@@ -51,7 +51,6 @@ class _StoryDetailPageState extends State<StoryDetailPage>
     await _audioPlayer.play(AssetSource(audioPath));  // For local audio files in assets
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,12 +61,19 @@ class _StoryDetailPageState extends State<StoryDetailPage>
         automaticallyImplyLeading: false, // Remove default back button
         actions: [
           IconButton(
-            icon: const Icon(Icons.volume_up, size: 30, color: Colors.black),
+            icon: const Text(
+              'X',
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // Make the X button bold
+                color: Colors.white, // White color for the X
+                fontSize: 22, // Slightly bigger font size for better visibility
+              ),
+            ),
             onPressed: () {
-              _playAudio('assets/audio/arabic_audio_1.mp3');  // Play Arabic audio
+              widget.onClose();  // Close the story
+              Navigator.pop(context); // Navigate back to the main page
             },
           ),
-
         ],
       ),
       body: ClipRRect(
@@ -90,10 +96,10 @@ class _StoryDetailPageState extends State<StoryDetailPage>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 20), // Add some space from the top
+                        // Floating image with tilt effect
                         AnimatedBuilder(
                           animation: _animationController,
                           builder: (context, child) {
-                            // Floating image with tilt effect
                             return Transform(
                               transform: Matrix4.identity()
                                 ..translate(

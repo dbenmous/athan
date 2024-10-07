@@ -4,6 +4,7 @@ import 'duae.dart'; // Import the duaes list
 import 'hadiths.dart'; // Import the hadiths list
 import 'story.dart'; // Import the story page
 import 'package:intl/intl.dart'; // For date formatting
+import 'settings.dart';
 
 class PrayerPage extends StatefulWidget {
   const PrayerPage({super.key});
@@ -88,7 +89,10 @@ class _PrayerPageState extends State<PrayerPage> {
                             color: Colors.black, // Black dots
                           ),
                           onPressed: () {
-                            // Add your settings page navigation here
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SettingsPage()),
+                            );
                           },
                         ),
                       ),
@@ -246,7 +250,7 @@ class _PrayerPageState extends State<PrayerPage> {
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: isNextPrayer ? const Color(0xCFE5ECED) : const Color(0xB6A0B3DD),  // White for next prayer, light grey for others
-        borderRadius: BorderRadius.circular(19.0),  // Rounded corners
+        borderRadius: BorderRadius.circular(22.0),  // Rounded corners
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
