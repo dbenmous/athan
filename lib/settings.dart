@@ -78,7 +78,7 @@ class SettingsPage extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
         child: Row(
           children: [
-            Icon(icon, color: Colors.black),
+            Icon(icon, color: Colors.blueGrey),
             SizedBox(width: 20),
             Expanded(
               child: Text(
