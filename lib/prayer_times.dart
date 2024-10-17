@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'calculation.dart'; // Import the calculation page
+import 'package:shared_preferences/shared_preferences.dart';
+import 'main.dart'; // This is where we pass the selected method to be used in the app.
+import 'calculation.dart'; // For navigating to the debug calculation page.
 
 class PrayerTimesPage extends StatefulWidget {
   @override
@@ -16,51 +18,73 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     'Umm al-Qura University, Makkah',
     'Dubai',
     'Moonsighting Committee',
-    'North America (ISNA)'
+    'North America (ISNA)',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedPreferences(); // Load the saved method or automatic setting
+  }
+
+  // Load saved method and settings from SharedPreferences
+  Future<void> _loadSavedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      currentMethod = prefs.getString('selectedMethod') ?? 'Umm al-Qura University, Makkah';
+      isAutomatic = prefs.getBool('isAutomatic') ?? false;
+    });
+  }
+
+  // Save the selected method or settings to SharedPreferences
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedMethod', currentMethod);
+    await prefs.setBool('isAutomatic', isAutomatic);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calculation Methods', style: TextStyle(fontFamily: 'Lato', fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text('Calculation Methods', style: TextStyle(fontFamily: 'Lato', fontSize: 20, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.grey[200],
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.blue),
+          icon: const Icon(Icons.arrow_back, color: Colors.blue),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Container(
         color: Colors.grey[200],
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Current Method Section
-            Text(
+            const Text(
               'CURRENT METHOD',
               style: TextStyle(fontFamily: 'Lato', fontSize: 17, color: Colors.blue, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12.0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 currentMethod,
-                style: TextStyle(fontFamily: 'Lato', fontSize: 17, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontFamily: 'Lato', fontSize: 17, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Automatic Switch
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Automatic',
                   style: TextStyle(fontFamily: 'Lato', fontSize: 17),
                 ),
@@ -69,6 +93,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
                   onChanged: (value) {
                     setState(() {
                       isAutomatic = value;
+                      _savePreferences(); // Save the setting whenever it is toggled
                     });
                   },
                 ),
@@ -77,31 +102,32 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
 
             // Calculation Methods List (Hidden if Automatic is enabled)
             if (!isAutomatic) ...[
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'CALCULATION METHODS',
                 style: TextStyle(fontFamily: 'Lato', fontSize: 17, color: Colors.blue, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Column(
                 children: calculationMethods.map((method) {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
                         currentMethod = method;
+                        _savePreferences(); // Save the selected method
                       });
                     },
                     child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
+                      margin: const EdgeInsets.symmetric(vertical: 5),
                       width: double.infinity,
-                      padding: EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         method,
-                        style: TextStyle(fontFamily: 'Lato', fontSize: 17),
+                        style: const TextStyle(fontFamily: 'Lato', fontSize: 17),
                       ),
                     ),
                   );
@@ -109,17 +135,19 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
               ),
             ],
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Temporary button for debugging, leading to calculation page
+            // Button to navigate to Calculation Page (Debugging or to show saved times)
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CalculationPage(selectedMethod: currentMethod)),
+                  MaterialPageRoute(
+                    builder: (context) => CalculationPage(), // Navigate to the calculation page
+                  ),
                 );
               },
-              child: Text('Go to Calculation Page'),
+              child: const Text('Go to Calculation Page'),
             ),
           ],
         ),

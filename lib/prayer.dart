@@ -427,7 +427,7 @@ class _PrayerPageState extends State<PrayerPage> {
     return Container(
       padding: const EdgeInsets.all(12.0), // Add some padding to make it look better
       decoration: BoxDecoration(
-        color: const Color(0xFDFDFD), // Transparent grey background
+        color: const Color(0x00fdfdfd), // Transparent grey background
         borderRadius: BorderRadius.circular(15.0), // Rounded corners
       ),
       child: Column(

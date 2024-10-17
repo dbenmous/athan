@@ -1,12 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'prayer.dart'; // Import the prayer page
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:workmanager/workmanager.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart'; // For date formatting
+import 'prayer.dart'; // Import the actual prayer page (first page)
+import 'calculation.dart'; // Import the calculation display page
+import 'package:adhan/adhan.dart'; // For prayer times calculation
 
-void main() {
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    await updatePrayerTimesIfNeeded();
+    return Future.value(true);
+  });
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize WorkManager
+  Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+
+  // Schedule the background task
+  Workmanager().registerPeriodicTask(
+    "1",
+    "updatePrayerTimes",
+    frequency: const Duration(hours: 24), // Ensure daily updates
+  );
+
   runApp(Athan());
 }
 
 class Athan extends StatelessWidget {
+  const Athan({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,35 +47,99 @@ class Athan extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MainPage(),
+      home: const MainPage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  int _currentIndex = 0; // Default tab is the first (Prayer tab)
+  int _currentIndex = 0;
 
-  // List of pages for the bottom navigation bar tabs
+  @override
+  void initState() {
+    super.initState();
+    _checkAndUpdateLocation();
+  }
+
+  // Pages for the bottom navigation bar tabs
   final List<Widget> _pages = [
-    const PrayerPage(),  // Prayer page as the first tab
-    const QiblaPage(),
-    const CalendarPage(),
-    const MosquesPage(),
+    const PrayerPage(), // This is the Prayer page from prayer.dart (first page)
+    const PlaceholderWidget(text: 'Qibla'),
+    const PlaceholderWidget(text: 'Calendar'),
+    const PlaceholderWidget(text: 'Mosques'),
+    CalculationPage(), // Page to show calculated times for debugging
   ];
+
+  Future<void> _checkAndUpdateLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? lastUpdated = prefs.getString('lastUpdated');
+    String today = DateTime.now().toString().split(' ')[0];
+
+    if (lastUpdated != today) {
+      await _requestLocationPermission();
+      await prefs.setString('lastUpdated', today);
+      await updatePrayerTimesIfNeeded();
+    } else {
+      print('Location already updated today.');
+    }
+  }
+
+  Future<void> _requestLocationPermission() async {
+    PermissionStatus permission = await Permission.location.request();
+
+    if (permission.isGranted) {
+      print('Fine location permission granted.');
+      await _getFineLocation();
+    } else {
+      print('Fine location permission denied. Using IP geolocation.');
+      await _getApproximateLocation();
+    }
+  }
+
+  Future<void> _getFineLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('latitude', position.latitude);
+    prefs.setDouble('longitude', position.longitude);
+    prefs.setBool('isLocationPrecise', true);
+
+    print('Fine location saved: Lat=${position.latitude}, Lon=${position.longitude}');
+  }
+
+  Future<void> _getApproximateLocation() async {
+    final response = await http.get(Uri.parse('http://ip-api.com/json'));
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      double latitude = data['lat'];
+      double longitude = data['lon'];
+
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setDouble('latitude', latitude);
+      prefs.setDouble('longitude', longitude);
+      prefs.setBool('isLocationPrecise', false);
+
+      print('Approximate location saved: Lat=$latitude, Lon=$longitude');
+    } else {
+      print('Error fetching IP geolocation.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // The body will show the content of the selected tab
       body: _pages[_currentIndex],
-
-      // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -56,20 +153,24 @@ class _MainPageState extends State<MainPage> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.personPraying), // Praying man icon
+            icon: FaIcon(FontAwesomeIcons.personPraying),
             label: 'Prayer',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.kaaba), // Kaaba icon
+            icon: FaIcon(FontAwesomeIcons.kaaba),
             label: 'Qibla',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.calendarAlt), // Calendar icon
+            icon: FaIcon(FontAwesomeIcons.calendarDays), // Updated icon
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.mosque), // Mosque icon
+            icon: FaIcon(FontAwesomeIcons.mosque),
             label: 'Mosques',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.calculator),
+            label: 'Calculation',
           ),
         ],
       ),
@@ -77,47 +178,82 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-// Placeholder for Qibla Page
-class QiblaPage extends StatelessWidget {
-  const QiblaPage({Key? key}) : super(key: key);
+// Placeholder widget for unimplemented pages
+class PlaceholderWidget extends StatelessWidget {
+  final String text;
+  const PlaceholderWidget({Key? key, required this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Qibla Page',
-        style: TextStyle(fontSize: 24, color: Colors.black),
+        '$text Page',
+        style: const TextStyle(fontSize: 24, color: Colors.black),
       ),
     );
   }
 }
 
-// Placeholder for Calendar Page
-class CalendarPage extends StatelessWidget {
-  const CalendarPage({Key? key}) : super(key: key);
+Future<void> updatePrayerTimesIfNeeded() async {
+  final prefs = await SharedPreferences.getInstance();
+  double? latitude = prefs.getDouble('latitude');
+  double? longitude = prefs.getDouble('longitude');
+  String? lastUpdateDate = prefs.getString('lastUpdated');
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Calendar Page',
-        style: TextStyle(fontSize: 24, color: Colors.black),
-      ),
-    );
+  // Fetch the selected method from SharedPreferences
+  String selectedMethod = prefs.getString('selectedMethod') ?? 'Muslim World League';
+
+  bool needsDailyUpdate = lastUpdateDate != DateTime.now().toString().split(' ')[0];
+
+  if (latitude != null && longitude != null && needsDailyUpdate) {
+    await calculateAndSavePrayerTimes(latitude, longitude, selectedMethod); // Pass the selected method
   }
 }
 
-// Placeholder for Mosques Page
-class MosquesPage extends StatelessWidget {
-  const MosquesPage({Key? key}) : super(key: key);
+Future<void> calculateAndSavePrayerTimes(double latitude, double longitude, String selectedMethod) async {
+  final prefs = await SharedPreferences.getInstance();
+  Map<String, List<String>> monthlyPrayerTimes = {};
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Mosques Page',
-        style: TextStyle(fontSize: 24, color: Colors.black),
-      ),
-    );
+  for (int i = 0; i < 30; i++) {
+    DateTime date = DateTime.now().add(Duration(days: i));
+    final dateComponents = DateComponents.from(date);
+
+    CalculationParameters params = getCalculationMethod(selectedMethod);
+
+    final coordinates = Coordinates(latitude, longitude);
+    final prayerTimes = PrayerTimes(coordinates, dateComponents, params);
+
+    monthlyPrayerTimes[DateFormat('yyyy-MM-dd').format(date)] = [
+      DateFormat.Hm().format(prayerTimes.fajr),
+      DateFormat.Hm().format(prayerTimes.sunrise),
+      DateFormat.Hm().format(prayerTimes.dhuhr),
+      DateFormat.Hm().format(prayerTimes.asr),
+      DateFormat.Hm().format(prayerTimes.maghrib),
+      DateFormat.Hm().format(prayerTimes.isha),
+    ];
+  }
+
+  prefs.setString('monthlyPrayerTimes', jsonEncode(monthlyPrayerTimes));
+  print('Prayer times for the next month saved in SharedPreferences.');
+}
+
+
+// Function to pull the selected method for prayer time calculation
+CalculationParameters getCalculationMethod(String selectedMethod) {
+  switch (selectedMethod) {
+    case 'Muslim World League':
+      return CalculationMethod.muslim_world_league.getParameters();
+    case 'Egyptian General Authority of Survey':
+      return CalculationParameters(fajrAngle: 19.5, ishaAngle: 17.5);
+    case 'University of Islamic Sciences, Karachi':
+      return CalculationParameters(fajrAngle: 18.0, ishaAngle: 18.0);
+    case 'Umm al-Qura University, Makkah':
+      return CalculationMethod.umm_al_qura.getParameters();
+    case 'Dubai':
+      return CalculationParameters(fajrAngle: 18.2, ishaAngle: 18.2);
+    case 'North America (ISNA)':
+      return CalculationMethod.north_america.getParameters();
+    default:
+      return CalculationMethod.muslim_world_league.getParameters();
   }
 }
