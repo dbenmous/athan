@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart'; // This is where we pass the selected method to be used in the app.
+import 'prayer_time_utils.dart'; // Import the utility functions
 import 'calculation.dart'; // For navigating to the debug calculation page.
 
 class PrayerTimesPage extends StatefulWidget {
@@ -41,6 +41,8 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedMethod', currentMethod);
     await prefs.setBool('isAutomatic', isAutomatic);
+    // After saving preferences, update the prayer times immediately
+    await updatePrayerTimesIfNeeded(); // Call the utility method to update prayer times
   }
 
   @override
@@ -90,11 +92,11 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
                 ),
                 Switch(
                   value: isAutomatic,
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     setState(() {
                       isAutomatic = value;
-                      _savePreferences(); // Save the setting whenever it is toggled
                     });
+                    await _savePreferences(); // Save the setting whenever it is toggled and update times
                   },
                 ),
               ],
@@ -111,11 +113,11 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
               Column(
                 children: calculationMethods.map((method) {
                   return GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       setState(() {
                         currentMethod = method;
-                        _savePreferences(); // Save the selected method
                       });
+                      await _savePreferences(); // Save the selected method and update times
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 5),

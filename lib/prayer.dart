@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // For location icon
+import 'package:shared_preferences/shared_preferences.dart';
 import 'duae.dart'; // Import the duaes list
 import 'hadiths.dart'; // Import the hadiths list
 import 'story.dart'; // Import the story page
 import 'package:intl/intl.dart'; // For date formatting
 import 'settings.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PrayerPage extends StatefulWidget {
   const PrayerPage({super.key});
@@ -16,13 +18,31 @@ class PrayerPage extends StatefulWidget {
 class _PrayerPageState extends State<PrayerPage> {
   int currentPage = 0; // Track the current page of duaes
   List<bool> viewedStories = List.generate(7, (index) => false); // Track viewed state of 7 stories
+  String location = 'Your City'; // Default city location
+  bool isCoarseLocation = false; // To check if the location is precise or not
 
   @override
   void initState() {
     super.initState();
+    _loadLocation(); // Load location from SharedPreferences
     // Calculate today's duae index based on the current date
     DateTime now = DateTime.now();
     currentPage = now.day % duaes.length; // Ensure the duae index wraps around
+  }
+
+  Future<void> _loadLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      location = prefs.getString('city') ?? 'Your City';
+      isCoarseLocation = !(prefs.getBool('isLocationPrecise') ?? false);
+    });
+  }
+
+  Future<void> _requestLocationPermission() async {
+    PermissionStatus permission = await Permission.location.request();
+    if (permission.isGranted) {
+      await openAppSettings(); // Open settings to allow precise location
+    }
   }
 
   @override
@@ -32,8 +52,7 @@ class _PrayerPageState extends State<PrayerPage> {
     String nextPrayerTime = '18:30';  // Next prayer time in 24-hour format
     String nextPrayerName = 'Isha';   // Next prayer name
     String hijriDate = '1 Muharram 1446';
-    String gregorianDate = 'September 19, 2024';
-    String location = 'Your City';    // City location
+    String gregorianDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
 
     Map<String, String> prayers = {
       'Fajr': '05:00',
@@ -90,8 +109,8 @@ class _PrayerPageState extends State<PrayerPage> {
                           ),
                           onPressed: () {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => SettingsPage()),
+                              context,
+                              MaterialPageRoute(builder: (context) => SettingsPage()),
                             );
                           },
                         ),
@@ -199,6 +218,17 @@ class _PrayerPageState extends State<PrayerPage> {
                             fontWeight: FontWeight.normal,
                           ),
                         ),
+                        if (isCoarseLocation)
+                          TextButton(
+                            onPressed: _requestLocationPermission,
+                            child: const Text(
+                              'Enable location for exact times',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFFFF0000), // Red color for the button
+                              ),
+                            ),
+                          ),
                       ],
                     ),
 
@@ -241,8 +271,6 @@ class _PrayerPageState extends State<PrayerPage> {
       ),
     );
   }
-
-  // Helper method to build each prayer widget
   Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, bool isNextPrayer) {
     return Container(
       width: 110,  // Set a fixed width
