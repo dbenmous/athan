@@ -6,10 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:workmanager/workmanager.dart';
 import 'dart:convert';
-import 'package:intl/intl.dart'; // For date formatting
-import 'prayer.dart'; // Import the actual prayer page (first page)
-import 'calculation.dart'; // Import the calculation display page
-import 'package:adhan/adhan.dart'; // For prayer times calculation
+import 'package:intl/intl.dart';
+import 'prayer.dart';
+import 'calculation.dart';
+import 'package:adhan/adhan.dart';
+import 'get_city_name.dart'; // Import the function for city and country retrieval
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -31,7 +32,7 @@ void main() async {
   Workmanager().registerPeriodicTask(
     "1",
     "updatePrayerTimes",
-    frequency: const Duration(hours: 24), // Ensure daily updates
+    frequency: const Duration(hours: 24),
   );
 
   runApp(Athan());
@@ -71,11 +72,11 @@ class _MainPageState extends State<MainPage> {
 
   // Pages for the bottom navigation bar tabs
   final List<Widget> _pages = [
-    const PrayerPage(), // This is the Prayer page from prayer.dart (first page)
+    const PrayerPage(),
     const PlaceholderWidget(text: 'Qibla'),
     const PlaceholderWidget(text: 'Calendar'),
     const PlaceholderWidget(text: 'Mosques'),
-    CalculationPage(), // Page to show calculated times for debugging
+    CalculationPage(),
   ];
 
   Future<void> _checkAndUpdateLocation() async {
@@ -112,9 +113,25 @@ class _MainPageState extends State<MainPage> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setDouble('latitude', position.latitude);
     prefs.setDouble('longitude', position.longitude);
-    prefs.setBool('isLocationPrecise', true);
 
-    print('Fine location saved: Lat=${position.latitude}, Lon=${position.longitude}');
+    // Fetch city and country using the new function
+    Map<String, String> locationData = await getCityAndCountry(position.latitude, position.longitude);
+    String city = locationData['city']!;
+    String country = locationData['country']!;
+
+    // Save the city and country in shared preferences
+    prefs.setString('city', city);
+    prefs.setString('country', country);
+
+    print('City name before saving: $city');
+    print('Country name before saving: $country');
+
+    // Retrieve and print the saved city and country
+    String? savedCity = prefs.getString('city');
+    String? savedCountry = prefs.getString('country');
+
+    print('Saved city name: $savedCity');
+    print('Saved country name: $savedCountry');
   }
 
   Future<void> _getApproximateLocation() async {
@@ -124,13 +141,21 @@ class _MainPageState extends State<MainPage> {
       var data = jsonDecode(response.body);
       double latitude = data['lat'];
       double longitude = data['lon'];
+      String city = data['city'] ?? 'Unknown City';
 
       final prefs = await SharedPreferences.getInstance();
       prefs.setDouble('latitude', latitude);
       prefs.setDouble('longitude', longitude);
-      prefs.setBool('isLocationPrecise', false);
 
-      print('Approximate location saved: Lat=$latitude, Lon=$longitude');
+      // Fetch city and country using the new function
+      Map<String, String> locationData = await getCityAndCountry(latitude, longitude);
+      String fetchedCity = locationData['city']!;
+      String fetchedCountry = locationData['country']!;
+
+      prefs.setString('city', fetchedCity);
+      prefs.setString('country', fetchedCountry);
+
+      print('Approximate location saved: Lat=$latitude, Lon=$longitude, City=$fetchedCity, Country=$fetchedCountry');
     } else {
       print('Error fetching IP geolocation.');
     }
@@ -161,7 +186,7 @@ class _MainPageState extends State<MainPage> {
             label: 'Qibla',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.calendarDays), // Updated icon
+            icon: FaIcon(FontAwesomeIcons.calendarDays),
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
@@ -206,7 +231,7 @@ Future<void> updatePrayerTimesIfNeeded() async {
   bool needsDailyUpdate = lastUpdateDate != DateTime.now().toString().split(' ')[0];
 
   if (latitude != null && longitude != null && needsDailyUpdate) {
-    await calculateAndSavePrayerTimes(latitude, longitude, selectedMethod); // Pass the selected method
+    await calculateAndSavePrayerTimes(latitude, longitude, selectedMethod);
   }
 }
 
@@ -236,7 +261,6 @@ Future<void> calculateAndSavePrayerTimes(double latitude, double longitude, Stri
   prefs.setString('monthlyPrayerTimes', jsonEncode(monthlyPrayerTimes));
   print('Prayer times for the next month saved in SharedPreferences.');
 }
-
 
 // Function to pull the selected method for prayer time calculation
 CalculationParameters getCalculationMethod(String selectedMethod) {

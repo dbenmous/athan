@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'get_city_name.dart'; // Import the function for getting the city name
 
 class CalculationPage extends StatefulWidget {
   const CalculationPage({Key? key}) : super(key: key);
@@ -53,6 +53,7 @@ class CalculationPageState extends State<CalculationPage> {
   }
 
   // Get location and try to display the city and country
+
   Future<void> _getLocationAndDisplayCityCountry() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -60,13 +61,14 @@ class CalculationPageState extends State<CalculationPage> {
       double? longitude = prefs.getDouble('longitude');
 
       if (latitude != null && longitude != null) {
-        // Use reverse geocoding to get the city and country
-        List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
-        Placemark place = placemarks[0];
+        // Use the function to get the city and country
+        Map<String, String> locationData = await getCityAndCountry(latitude, longitude);
+        String city = locationData['city']!;
+        String country = locationData['country']!;
 
         setState(() {
-          city = place.locality ?? 'Unknown';
-          country = place.country ?? 'Unknown';
+          this.city = city;
+          this.country = country;
         });
       } else {
         setState(() {
@@ -82,6 +84,7 @@ class CalculationPageState extends State<CalculationPage> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
