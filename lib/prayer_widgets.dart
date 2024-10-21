@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'duae.dart';
 
 // Function to build prayer widgets
 Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, bool isNextPrayer) {
   return Container(
-    width: 110, // Fixed width for each prayer widget
-    height: 130, // Fixed height for each prayer widget
+    width: 100, // Set width to fit 3 widgets per row
+    height: 130, // Consistent height for all prayer widgets
     padding: const EdgeInsets.all(12.0),
     decoration: BoxDecoration(
       color: isNextPrayer ? const Color(0xCFE5ECED) : const Color(0xB6A0B3DD),
@@ -56,26 +54,36 @@ Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, b
   );
 }
 
-// Function to build the prayer grid using GridView
-Widget buildPrayerGrid(List<Map<String, dynamic>> prayers) {
-  return GridView.builder(
-    physics: const NeverScrollableScrollPhysics(), // Prevents the grid from scrolling separately
-    shrinkWrap: true, // Allows it to take only the necessary space
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3, // 3 widgets per row
-      mainAxisSpacing: 16, // Space between rows
-      crossAxisSpacing: 16, // Space between columns
-      childAspectRatio: 1, // Aspect ratio for uniformity
-    ),
-    itemCount: prayers.length,
-    itemBuilder: (context, index) {
-      return buildPrayerWidget(
-        prayers[index]['name'],
-        prayers[index]['time'],
-        prayers[index]['isSoundOn'],
-        prayers[index]['isNextPrayer'],
-      );
-    },
+// Function to build the grid for the prayers (3 widgets per row)
+Widget buildPrayerGrid(BuildContext context, List<Map<String, dynamic>> prayers) {
+  return Column(
+    children: [
+      // First row with 3 prayer widgets
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          buildPrayerWidget(
+              prayers[0]['name'], prayers[0]['time'], prayers[0]['isSoundOn'], prayers[0]['isNextPrayer']),
+          buildPrayerWidget(
+              prayers[1]['name'], prayers[1]['time'], prayers[1]['isSoundOn'], prayers[1]['isNextPrayer']),
+          buildPrayerWidget(
+              prayers[2]['name'], prayers[2]['time'], prayers[2]['isSoundOn'], prayers[2]['isNextPrayer']),
+        ],
+      ),
+      const SizedBox(height: 16), // Space between the rows
+      // Second row with 3 prayer widgets
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          buildPrayerWidget(
+              prayers[3]['name'], prayers[3]['time'], prayers[3]['isSoundOn'], prayers[3]['isNextPrayer']),
+          buildPrayerWidget(
+              prayers[4]['name'], prayers[4]['time'], prayers[4]['isSoundOn'], prayers[4]['isNextPrayer']),
+          buildPrayerWidget(
+              prayers[5]['name'], prayers[5]['time'], prayers[5]['isSoundOn'], prayers[5]['isNextPrayer']),
+        ],
+      ),
+    ],
   );
 }
 
@@ -207,19 +215,15 @@ Widget buildDuaeSection(String duae) {
           ),
         ),
         const SizedBox(height: 10),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Text(
-              duae,
-              style: const TextStyle(
-                fontFamily: 'Jamil-nory',
-                fontSize: 25,
-                fontWeight: FontWeight.normal,
-                color: Color(0xFFE5ECED),
-              ),
-              textAlign: TextAlign.center,
-            ),
+        Text(
+          duae,
+          style: const TextStyle(
+            fontFamily: 'Jamil-nory',
+            fontSize: 25,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFFE5ECED),
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     ),
