@@ -56,30 +56,26 @@ Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, b
   );
 }
 
-// Function to build the prayer grid
+// Function to build the prayer grid using GridView
 Widget buildPrayerGrid(List<Map<String, dynamic>> prayers) {
-  return Column(
-    children: [
-      // First row of 3 widgets
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          buildPrayerWidget(prayers[0]['name'], prayers[0]['time'], prayers[0]['isSoundOn'], prayers[0]['isNextPrayer']),
-          buildPrayerWidget(prayers[1]['name'], prayers[1]['time'], prayers[1]['isSoundOn'], prayers[1]['isNextPrayer']),
-          buildPrayerWidget(prayers[2]['name'], prayers[2]['time'], prayers[2]['isSoundOn'], prayers[2]['isNextPrayer']),
-        ],
-      ),
-      const SizedBox(height: 16), // Space between rows
-      // Second row of 3 widgets
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          buildPrayerWidget(prayers[3]['name'], prayers[3]['time'], prayers[3]['isSoundOn'], prayers[3]['isNextPrayer']),
-          buildPrayerWidget(prayers[4]['name'], prayers[4]['time'], prayers[4]['isSoundOn'], prayers[4]['isNextPrayer']),
-          buildPrayerWidget(prayers[5]['name'], prayers[5]['time'], prayers[5]['isSoundOn'], prayers[5]['isNextPrayer']),
-        ],
-      ),
-    ],
+  return GridView.builder(
+    physics: const NeverScrollableScrollPhysics(), // Prevents the grid from scrolling separately
+    shrinkWrap: true, // Allows it to take only the necessary space
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3, // 3 widgets per row
+      mainAxisSpacing: 16, // Space between rows
+      crossAxisSpacing: 16, // Space between columns
+      childAspectRatio: 1, // Aspect ratio for uniformity
+    ),
+    itemCount: prayers.length,
+    itemBuilder: (context, index) {
+      return buildPrayerWidget(
+        prayers[index]['name'],
+        prayers[index]['time'],
+        prayers[index]['isSoundOn'],
+        prayers[index]['isNextPrayer'],
+      );
+    },
   );
 }
 
