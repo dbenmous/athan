@@ -7,6 +7,7 @@ import 'duae.dart';
 import 'prayer_widgets.dart';
 import 'settings.dart';
 import 'get_city_name.dart';
+import 'next_prayer.dart'; // Import the new file
 
 class PrayerPage extends StatefulWidget {
   const PrayerPage({super.key});
@@ -91,33 +92,6 @@ class _PrayerPageState extends State<PrayerPage> {
     }
   }
 
-  Prayer _getNextPrayer() {
-    DateTime now = DateTime.now();
-    // Find the first prayer that is after the current time
-    for (Prayer prayer in prayerTimes) {
-      if (prayer.time.isAfter(now)) {
-        return prayer;
-      }
-    }
-    // If no prayer is left for today, return the first prayer of the next day
-    DateTime nextDayPrayerTime = prayerTimes[0].time.add(const Duration(days: 1));
-    return Prayer(name: prayerTimes[0].name, time: nextDayPrayerTime);
-  }
-
-  String _getTimeRemaining(DateTime nextPrayerTime) {
-    DateTime now = DateTime.now();
-    Duration difference = nextPrayerTime.difference(now);
-
-    int hours = difference.inHours;
-    int minutes = difference.inMinutes % 60;
-
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    } else {
-      return '${minutes}m';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,9 +173,9 @@ class _PrayerPageState extends State<PrayerPage> {
       );
     }
 
-    Prayer nextPrayer = _getNextPrayer();
-    String timeRemaining = _getTimeRemaining(nextPrayer.time);
-    String nextPrayerTime = DateFormat.Hm().format(nextPrayer.time);
+    Prayer nextPrayer = getNextPrayer(prayerTimes);
+    String timeRemaining = getTimeRemaining(nextPrayer.time);
+    String nextPrayerTime = formatPrayerTime(nextPrayer.time);
     String nextPrayerName = nextPrayer.name;
 
     return Column(
@@ -286,18 +260,11 @@ class _PrayerPageState extends State<PrayerPage> {
       return {
         'name': prayer.name,
         'time': DateFormat.Hm().format(prayer.time),
-        'isSoundOn': true,
-        'isNextPrayer': false,
+        'isSoundOn': true, // Adjust this based on your logic for sound notifications
+        'isNextPrayer': false, // Adjust this based on your logic for the next prayer
       };
     }).toList();
 
     return buildPrayerGrid(context, prayerData);
   }
-}
-
-class Prayer {
-  final String name;
-  final DateTime time;
-
-  Prayer({required this.name, required this.time});
 }
