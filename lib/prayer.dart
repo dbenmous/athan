@@ -72,7 +72,6 @@ class _PrayerPageState extends State<PrayerPage> {
         setState(() {
           prayerTimes = [
             Prayer(name: 'Fajr', time: DateFormat.Hm().parse(todayPrayerTimes[0])),
-            Prayer(name: 'Sunrise', time: DateFormat.Hm().parse(todayPrayerTimes[1])),
             Prayer(name: 'Dhuhr', time: DateFormat.Hm().parse(todayPrayerTimes[2])),
             Prayer(name: 'Asr', time: DateFormat.Hm().parse(todayPrayerTimes[3])),
             Prayer(name: 'Maghrib', time: DateFormat.Hm().parse(todayPrayerTimes[4])),
@@ -89,6 +88,33 @@ class _PrayerPageState extends State<PrayerPage> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Prayer _getNextPrayer() {
+    DateTime now = DateTime.now();
+    // Find the first prayer that is after the current time
+    for (Prayer prayer in prayerTimes) {
+      if (prayer.time.isAfter(now)) {
+        return prayer;
+      }
+    }
+    // If no prayer is left for today, return the first prayer of the next day
+    DateTime nextDayPrayerTime = prayerTimes[0].time.add(const Duration(days: 1));
+    return Prayer(name: prayerTimes[0].name, time: nextDayPrayerTime);
+  }
+
+  String _getTimeRemaining(DateTime nextPrayerTime) {
+    DateTime now = DateTime.now();
+    Duration difference = nextPrayerTime.difference(now);
+
+    int hours = difference.inHours;
+    int minutes = difference.inMinutes % 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else {
+      return '${minutes}m';
     }
   }
 
@@ -162,9 +188,21 @@ class _PrayerPageState extends State<PrayerPage> {
   }
 
   Widget _buildNextPrayerSection() {
-    String timeRemaining = '1h 23m';
-    String nextPrayerTime = '18:30';
-    String nextPrayerName = 'Isha';
+    if (prayerTimes.isEmpty) {
+      return const Text(
+        'Loading prayer times...',
+        style: TextStyle(
+          fontFamily: 'Lato',
+          fontSize: 20,
+          color: Color(0xFFE5ECED),
+        ),
+      );
+    }
+
+    Prayer nextPrayer = _getNextPrayer();
+    String timeRemaining = _getTimeRemaining(nextPrayer.time);
+    String nextPrayerTime = DateFormat.Hm().format(nextPrayer.time);
+    String nextPrayerName = nextPrayer.name;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,16 +282,16 @@ class _PrayerPageState extends State<PrayerPage> {
   }
 
   Widget _buildPrayerTimes() {
-    return Column(
-      children: prayerTimes.map((prayer) {
-        return buildPrayerWidget(
-          prayer.name,
-          DateFormat.Hm().format(prayer.time),
-          true, // Sound status; adjust as needed
-          false, // Highlighting status; adjust as needed
-        );
-      }).toList(),
-    );
+    List<Map<String, dynamic>> prayerData = prayerTimes.map((prayer) {
+      return {
+        'name': prayer.name,
+        'time': DateFormat.Hm().format(prayer.time),
+        'isSoundOn': true,
+        'isNextPrayer': false,
+      };
+    }).toList();
+
+    return buildPrayerGrid(context, prayerData);
   }
 }
 

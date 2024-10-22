@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, bool isNextPrayer) {
   return Container(
     width: 100, // Set width to fit 3 widgets per row
-    height: 130, // Consistent height for all prayer widgets
+    height: 120, // Consistent height for all prayer widgets
     padding: const EdgeInsets.all(12.0),
     decoration: BoxDecoration(
       color: isNextPrayer ? const Color(0xCFE5ECED) : const Color(0xB6A0B3DD),
-      borderRadius: BorderRadius.circular(22.0),
+      borderRadius: BorderRadius.circular(20.0),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.2),
@@ -56,36 +56,27 @@ Widget buildPrayerWidget(String prayerName, String prayerTime, bool isSoundOn, b
 
 // Function to build the grid for the prayers (3 widgets per row)
 Widget buildPrayerGrid(BuildContext context, List<Map<String, dynamic>> prayers) {
-  return Column(
-    children: [
-      // First row with 3 prayer widgets
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          buildPrayerWidget(
-              prayers[0]['name'], prayers[0]['time'], prayers[0]['isSoundOn'], prayers[0]['isNextPrayer']),
-          buildPrayerWidget(
-              prayers[1]['name'], prayers[1]['time'], prayers[1]['isSoundOn'], prayers[1]['isNextPrayer']),
-          buildPrayerWidget(
-              prayers[2]['name'], prayers[2]['time'], prayers[2]['isSoundOn'], prayers[2]['isNextPrayer']),
-        ],
-      ),
-      const SizedBox(height: 16), // Space between the rows
-      // Second row with 3 prayer widgets
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          buildPrayerWidget(
-              prayers[3]['name'], prayers[3]['time'], prayers[3]['isSoundOn'], prayers[3]['isNextPrayer']),
-          buildPrayerWidget(
-              prayers[4]['name'], prayers[4]['time'], prayers[4]['isSoundOn'], prayers[4]['isNextPrayer']),
-          buildPrayerWidget(
-              prayers[5]['name'], prayers[5]['time'], prayers[5]['isSoundOn'], prayers[5]['isNextPrayer']),
-        ],
-      ),
-    ],
+  return GridView.builder(
+    shrinkWrap: true, // Prevents the grid from taking up infinite height
+    physics: const NeverScrollableScrollPhysics(), // Disables scrolling within the grid
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3, // 3 widgets per row
+      crossAxisSpacing: 10.0, // Space between widgets horizontally
+      mainAxisSpacing: 10.0, // Space between widgets vertically
+      childAspectRatio: 0.77, // Aspect ratio for width and height
+    ),
+    itemCount: prayers.length,
+    itemBuilder: (context, index) {
+      return buildPrayerWidget(
+        prayers[index]['name'],
+        prayers[index]['time'],
+        prayers[index]['isSoundOn'],
+        prayers[index]['isNextPrayer'],
+      );
+    },
   );
 }
+
 
 // Function to build the stories section
 Widget buildStoriesSection(List<bool> viewedStories, BuildContext context) {
